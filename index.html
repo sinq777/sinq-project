@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Браузер заблокирован</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #lockScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      color: lime;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    #lockScreen h1 {
+      font-size: 3em;
+    }
+
+    #unlockBtn {
+      margin-top: 20px;
+      font-size: 1.5em;
+      padding: 10px 20px;
+      background: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div id="lockScreen">
+  <h1>⚠️ Браузер заблокирован</h1>
+  <p>Для продолжения необходимо выполнить действие</p>
+  <button id="unlockBtn">Разблокировать</button>
+</div>
+
+<script>
+  // Запрос на Fullscreen
+  function goFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+  }
+
+  // Блокировка клавиш и мыши
+  function blockControls() {
+    window.addEventListener('keydown', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('contextmenu', e => e.preventDefault());
+
+    window.addEventListener('beforeunload', function (e) {
+      e.preventDefault();
+      e.returnValue = 'Страница заблокирована!';
+    });
+
+    document.body.style.overflow = 'hidden';
+
+    // Фокус навсегда
+    setInterval(() => {
+      window.focus();
+    }, 1000);
+  }
+
+  // Эффект блокировки при загрузке
+  window.onload = () => {
+    goFullscreen();
+    blockControls();
+  };
+
+  // Кнопка разблокировки (условная)
+  document.getElementById('unlockBtn').onclick = () => {
+    document.getElementById('lockScreen').remove();
+    document.exitFullscreen?.();
+  };
+</script>
+
+</body>
+</html>
