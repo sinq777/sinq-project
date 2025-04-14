@@ -1,96 +1,227 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Браузер заблокирован</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
-
-    #lockScreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      color: lime;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 99999;
-    }
-
-    #lockScreen h1 {
-      font-size: 3em;
-    }
-
-    #unlockBtn {
-      margin-top: 20px;
-      font-size: 1.5em;
-      padding: 10px 20px;
-      background: red;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учебный пример: Блокировка интерфейса</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        
+        #container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        #warning {
+            color: #d32f2f;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        #status {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            color: white;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            font-size: 24px;
+        }
+        
+        #password-input {
+            padding: 10px;
+            font-size: 18px;
+            margin: 20px;
+            width: 200px;
+        }
+    </style>
 </head>
 <body>
+    <div id="container">
+        <h1>Учебный пример: Исследование блокировки интерфейса</h1>
+        <p>Это демонстрация возможностей JavaScript для научных исследований UI/UX и безопасности браузеров.</p>
+        
+        <div id="status">
+            <p>Текущий статус: <span id="status-text">неактивен</span></p>
+        </div>
+        
+        <button id="lockBtn">Активировать учебный режим</button>
+        <button id="unlockBtn" style="background-color: #f44336;">Деактивировать</button>
+        
+        <div id="warning">
+            Внимание: Это только учебный пример. Реальные браузеры имеют строгие ограничения безопасности.
+        </div>
+    </div>
+    
+    <div id="lock-screen">
+        <h2>Учебный режим активирован</h2>
+        <p>Имитация блокировки интерфейса для научных исследований</p>
+        <p>Введите пароль "12345" для выхода</p>
+        <input type="password" id="password-input" placeholder="Введите пароль">
+        <button id="unlock-screen-btn">Разблокировать</button>
+    </div>
 
-<div id="lockScreen">
-  <h1>⚠️ Браузер заблокирован</h1>
-  <p>Для продолжения необходимо выполнить действие</p>
-  <button id="unlockBtn">Разблокировать</button>
-</div>
-
-<script>
-  // Запрос на Fullscreen
-  function goFullscreen() {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
-  }
-
-  // Блокировка клавиш и мыши
-  function blockControls() {
-    window.addEventListener('keydown', (e) => {
-      e.preventDefault();
-    }, { passive: false });
-
-    window.addEventListener('contextmenu', e => e.preventDefault());
-
-    window.addEventListener('beforeunload', function (e) {
-      e.preventDefault();
-      e.returnValue = 'Страница заблокирована!';
-    });
-
-    document.body.style.overflow = 'hidden';
-
-    // Фокус навсегда
-    setInterval(() => {
-      window.focus();
-    }, 1000);
-  }
-
-  // Эффект блокировки при загрузке
-  window.onload = () => {
-    goFullscreen();
-    blockControls();
-  };
-
-  // Кнопка разблокировки (условная)
-  document.getElementById('unlockBtn').onclick = () => {
-    document.getElementById('lockScreen').remove();
-    document.exitFullscreen?.();
-  };
-</script>
-
+    <script>
+        // Элементы DOM
+        const lockBtn = document.getElementById('lockBtn');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const statusDiv = document.getElementById('status');
+        const statusText = document.getElementById('status-text');
+        const lockScreen = document.getElementById('lock-screen');
+        const passwordInput = document.getElementById('password-input');
+        const unlockScreenBtn = document.getElementById('unlock-screen-btn');
+        
+        // Флаги состояния
+        let isLocked = false;
+        
+        // Инициализация
+        updateUI();
+        
+        // Обработчики событий
+        lockBtn.addEventListener('click', activateLockMode);
+        unlockBtn.addEventListener('click', deactivateLockMode);
+        unlockScreenBtn.addEventListener('click', checkPassword);
+        
+        // Основная функция активации
+        function activateLockMode() {
+            if (isLocked) return;
+            
+            // 1. Активируем полноэкранный режим
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen()
+                    .then(() => {
+                        startLockMode();
+                    })
+                    .catch(err => {
+                        console.error("Ошибка полноэкранного режима:", err);
+                        startLockMode();
+                    });
+            } else {
+                startLockMode();
+            }
+        }
+        
+        function startLockMode() {
+            isLocked = true;
+            
+            // Показываем экран блокировки
+            lockScreen.style.display = 'flex';
+            statusText.textContent = 'активен (экран блокировки)';
+            statusDiv.style.display = 'block';
+            
+            // Блокируем контекстное меню
+            document.addEventListener('contextmenu', preventContextMenu);
+            
+            // Блокируем клавиши
+            document.addEventListener('keydown', preventKeys);
+            
+            // Мониторим выход из полноэкранного режима
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            
+            console.log("Учебный режим активирован");
+        }
+        
+        function deactivateLockMode() {
+            if (!isLocked) return;
+            
+            // Выходим из полноэкранного режима
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            unlockLockMode();
+        }
+        
+        function unlockLockMode() {
+            isLocked = false;
+            
+            // Скрываем экран блокировки
+            lockScreen.style.display = 'none';
+            statusText.textContent = 'неактивен';
+            
+            // Удаляем обработчики событий
+            document.removeEventListener('contextmenu', preventContextMenu);
+            document.removeEventListener('keydown', preventKeys);
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            
+            console.log("Учебный режим деактивирован");
+        }
+        
+        function checkPassword() {
+            if (passwordInput.value === "12345") {
+                deactivateLockMode();
+                passwordInput.value = "";
+            } else {
+                alert("Неверный пароль! Попробуйте снова.");
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+        }
+        
+        // Вспомогательные функции
+        function preventContextMenu(e) {
+            e.preventDefault();
+        }
+        
+        function preventKeys(e) {
+            const blockedKeys = ['F5', 'F12', 'F11', 'Escape', 'Tab'];
+            if (blockedKeys.includes(e.key)) {
+                e.preventDefault();
+            }
+        }
+        
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && isLocked) {
+                document.documentElement.requestFullscreen()
+                    .catch(err => {
+                        console.log("Не удалось восстановить полноэкранный режим:", err);
+                    });
+            }
+        }
+        
+        function updateUI() {
+            unlockBtn.disabled = !isLocked;
+        }
+    </script>
 </body>
 </html>
